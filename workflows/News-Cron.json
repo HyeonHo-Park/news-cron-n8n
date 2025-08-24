@@ -1,0 +1,347 @@
+{
+  "name": "News-Cron",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hour": 9
+            }
+          ]
+        }
+      },
+      "name": "Daily Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        400
+      ],
+      "id": "b2233b8f-24cb-4dc7-90e9-adfb363be8a4"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.bbci.co.uk/news/rss.xml",
+        "options": {}
+      },
+      "name": "NYTimes",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fe2b5d6f-0602-4445-bd42-95c1987c790c"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.bbci.co.uk/news/rss.xml",
+        "options": {}
+      },
+      "name": "BBC News",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        0,
+        144
+      ],
+      "id": "d29f441b-2f06-4999-ae5a-e95e43febf76"
+    },
+    {
+      "parameters": {
+        "url": "https://www.mk.co.kr/rss/30100041/",
+        "options": {}
+      },
+      "name": "MaeilKyungje",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        0,
+        528
+      ],
+      "id": "8674ffc5-6d08-48c1-8fa3-6ec36b96d5b2"
+    },
+    {
+      "parameters": {
+        "url": "https://fredblog.stlouisfed.org/feed/",
+        "options": {}
+      },
+      "name": "FRED",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        0,
+        672
+      ],
+      "id": "f6bb654a-5664-4411-861a-e3d101c11168"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.marketwatch.com/marketwatch/topstories/",
+        "options": {}
+      },
+      "name": "MarketWatch",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        0,
+        400
+      ],
+      "id": "46eebef5-b531-4482-9358-06fccddeb4a2"
+    },
+    {
+      "parameters": {
+        "url": "https://www.theguardian.com/world/rss",
+        "options": {}
+      },
+      "name": "Guardian",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        0,
+        272
+      ],
+      "id": "d1993196-a988-46b3-a427-63a202a093ce"
+    },
+    {
+      "parameters": {
+        "url": "https://www.hankyung.com/feed/economy",
+        "options": {}
+      },
+      "name": "Hankyung Economy",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        0,
+        800
+      ],
+      "id": "4273bb3f-aeef-4c1a-948c-b38bde81dca9"
+    },
+    {
+      "parameters": {
+        "jsCode": "function getDomainName(url) {\n  // 프로토콜 제거 후 www. 뒤의 첫 번째 도메인만 추출\n  const match = url.match(/^(?:https?:\\/\\/)?(?:www\\.)?([^./]+)/i);\n  return match ? match[1] : null;\n}\n\n\n// n8n Code 노드 표준 방식\nconsole.log('Total items received:', $input.all().length);\n\nconst allData = [];\n\n// $input.all()을 사용해서 모든 입력 아이템 가져오기\nconst inputItems = $input.all();\n\nfor (let i = 0; i < inputItems.length; i++) {\n  console.log(`Processing item ${i}`);\n  const item = inputItems[i];\n  \n  if (item.json) {\n    allData.push({\n      source_index: i,\n      name: getDomainName($input.first().json.link).toUpperCase(),\n      data: item.json\n    });\n  }\n}\n\nconsole.log('Total processed:', allData.length);\n\n// n8n 표준 출력 형식\nreturn allData.map(data => ({ json: data }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        400
+      ],
+      "id": "deb512c2-5e48-4763-94f6-44a9a47b4e94",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        400
+      ],
+      "id": "8bd47858-bc9d-4283-a791-3eaf9722c896",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "numberInputs": 7
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        448,
+        320
+      ],
+      "id": "4c409806-4b01-407d-8a1c-42c5c4691739",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/home/node/output/뉴스요약_{{ $now.format('yyyy-MM-dd') }}.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        400
+      ],
+      "id": "5a38a4f1-208c-453c-881a-f09272d75487",
+      "name": "Read/Write Files from Disk"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily Trigger": {
+      "main": [
+        [
+          {
+            "node": "NYTimes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "BBC News",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MaeilKyungje",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FRED",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MarketWatch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Guardian",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Hankyung Economy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NYTimes": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BBC News": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "MaeilKyungje": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "FRED": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "MarketWatch": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Guardian": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Hankyung Economy": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 6
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d1395d8b-82ca-4cfc-8c02-c63ca2d0d6a5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e627ba3cf413f5c8fbbcb0c34adbe72399de282a282eb839e23356d673f567eb"
+  },
+  "id": "nkWfHFwXhop77cQZ",
+  "tags": []
+}

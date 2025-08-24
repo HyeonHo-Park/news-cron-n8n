@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n
+  namespace: n8n
+  labels:
+    app: n8n
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n8n
+  template:
+    metadata:
+      labels:
+        app: n8n
+    spec:
+      nodeSelector:
+        workload: n8n
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
+      containers:
+      - name: n8n
+        image: n8nio/n8n:latest
+        ports:
+        - containerPort: 5678
+        env:
+        - name: N8N_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: n8n-config
+              key: N8N_HOST
+        - name: N8N_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: n8n-config
+              key: N8N_PORT
+        - name: N8N_PROTOCOL
+          valueFrom:
+            configMapKeyRef:
+              name: n8n-config
+              key: N8N_PROTOCOL
+        - name: WEBHOOK_URL
+          valueFrom:
+            configMapKeyRef:
+              name: n8n-config
+              key: WEBHOOK_URL
+        - name: GENERIC_TIMEZONE
+          valueFrom:
+            configMapKeyRef:
+              name: n8n-config
+              key: GENERIC_TIMEZONE
+        - name: N8N_USER_MANAGEMENT_DISABLED
+          valueFrom:
+            configMapKeyRef:
+              name: n8n-config
+              key: N8N_USER_MANAGEMENT_DISABLED
+        - name: N8N_BASIC_AUTH_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: n8n-config
+              key: N8N_BASIC_AUTH_ACTIVE
+        - name: N8N_METRICS
+          valueFrom:
+            configMapKeyRef:
+              name: n8n-config
+              key: N8N_METRICS
+        - name: N8N_LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: n8n-config
+              key: N8N_LOG_LEVEL
+        - name: N8N_EXECUTE_IN_SAME_PROCESS
+          valueFrom:
+            configMapKeyRef:
+              name: n8n-config
+              key: N8N_EXECUTE_IN_SAME_PROCESS
+        volumeMounts:
+        - name: n8n-data
+          mountPath: /root/.n8n
+        - name: output-data
+          mountPath: /home/node/output
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 5678
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 5678
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: n8n-data
+        persistentVolumeClaim:
+          claimName: n8n-data-pvc
+      - name: output-data
+        persistentVolumeClaim:
+          claimName: n8n-output-pvc
