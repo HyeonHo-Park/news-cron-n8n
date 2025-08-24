@@ -1,6 +1,6 @@
 # Daily Cron News with n8n
 
-n8n 클러스터를 통해, daily new를 긁어오고 notebooklm에 업로드하여 뉴스를 보는용도
+n8n 클러스터를 통해, daily new를 긁어오고 notebooklm에 업로드하여 뉴스를 보는 용도
 
 ## 🚀 Pre-Install
 ```shell
@@ -39,8 +39,8 @@ colima start \
 --runtime docker \
 --arch aarch64 \
 --cpu 4 --memory 8 \
---mount ${HOME}/notebooklm/n8n/data:w \
---mount ${HOME}/notebooklm/n8n/output:w
+--mount ${PWD}/data:w \
+--mount ${PWD}output:w
 ```
 
 ## 2. kind 클러스터 및 n8n 배포
