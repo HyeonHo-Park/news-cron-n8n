@@ -1,6 +1,6 @@
-# n8n on KIND (Kubernetes in Docker)
+# Daily Cron News with n8n
 
-kind 클러스터에서 n8n을 실행하기 위한 Kubernetes 매니페스트와 스크립트입니다.
+n8n 클러스터를 통해, daily new를 긁어오고 notebooklm에 업로드하여 뉴스를 보는용도
 
 ## 🚀 Pre-Install
 ```shell
